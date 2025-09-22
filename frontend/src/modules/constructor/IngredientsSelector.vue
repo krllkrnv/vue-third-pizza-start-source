@@ -8,9 +8,11 @@
         :key="ingredient.id"
         class="ingredients__item"
       >
-        <span :class="getIngredientClass(ingredient)">
-          {{ ingredient.name }}
-        </span>
+        <AppDrag :transfer-data="{ ingredient }">
+          <span :class="getIngredientClass(ingredient)">
+            {{ ingredient.name }}
+          </span>
+        </AppDrag>
 
         <div class="counter counter--orange ingredients__counter">
           <button
@@ -31,6 +33,7 @@
           <button
             type="button"
             class="counter__button counter__button--plus"
+            :disabled="getIngredientQuantity(ingredient.id) >= 3"
             @click="increaseIngredient(ingredient)"
           >
             <span class="visually-hidden">Больше</span>
@@ -42,7 +45,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { AppDrag } from "@/common/components";
 
 const props = defineProps({
   ingredientOptions: {
@@ -68,10 +71,12 @@ const getIngredientQuantity = (ingredientId) => {
 
 const increaseIngredient = (ingredient) => {
   const currentQuantity = getIngredientQuantity(ingredient.id);
-  emit("ingredient-change", {
-    ingredient,
-    quantity: currentQuantity + 1,
-  });
+  if (currentQuantity < 3) {
+    emit("ingredient-change", {
+      ingredient,
+      quantity: currentQuantity + 1,
+    });
+  }
 };
 
 const decreaseIngredient = (ingredient) => {

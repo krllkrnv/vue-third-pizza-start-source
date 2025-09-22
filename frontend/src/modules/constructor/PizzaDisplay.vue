@@ -12,15 +12,24 @@
     </label>
 
     <div class="content__constructor">
-      <div :class="pizzaFoundationClass">
-        <div class="pizza__wrapper">
-          <div
-            v-for="(ingredient, index) in visibleIngredients"
-            :key="`${ingredient.id}-${index}`"
-            :class="`pizza__filling pizza__filling--${getIngredientClass(ingredient)}`"
-          ></div>
+      <AppDrop
+        @drop="onIngredientDrop"
+        @dragenter="onDragEnter"
+        @dragleave="onDragLeave"
+        @dragover="onDragOver"
+      >
+        <div
+          :class="[pizzaFoundationClass, { 'pizza--drag-over': isDragOver }]"
+        >
+          <div class="pizza__wrapper">
+            <div
+              v-for="(ingredient, index) in visibleIngredients"
+              :key="`${ingredient.id}-${index}`"
+              :class="`pizza__filling pizza__filling--${getIngredientClass(ingredient)}${ingredient.cssClass ? ` pizza__filling--${ingredient.cssClass}` : ''}`"
+            ></div>
+          </div>
         </div>
-      </div>
+      </AppDrop>
     </div>
 
     <div class="content__result">
@@ -38,7 +47,8 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { AppDrop } from "@/common/components";
 import ingredientsData from "@/mocks/ingredients.json";
 
 const props = defineProps({
@@ -68,17 +78,20 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["pizza-name-change", "order-click"]);
+const emit = defineEmits([
+  "pizza-name-change",
+  "order-click",
+  "ingredient-change",
+]);
+
+const isDragOver = ref(false);
 
 const pizzaFoundationClass = computed(() => {
-  const sizeClass =
-    props.selectedSize?.id === 1
-      ? "small"
-      : props.selectedSize?.id === 2
-        ? "normal"
-        : "big";
+  const doughClass = props.selectedDough?.id === 1 ? "small" : "big";
+
   const sauceClass = props.selectedSauce?.id === 1 ? "tomato" : "creamy";
-  return `pizza pizza--foundation--${sizeClass}-${sauceClass}`;
+
+  return `pizza pizza--foundation--${doughClass}-${sauceClass}`;
 });
 
 const visibleIngredients = computed(() => {
@@ -86,13 +99,13 @@ const visibleIngredients = computed(() => {
   Object.entries(props.selectedIngredients).forEach(
     ([ingredientId, quantity]) => {
       if (quantity > 0) {
-        // Находим ингредиент по ID
         const ingredient = findIngredientById(parseInt(ingredientId));
         if (ingredient) {
-          // Добавляем ингредиент столько раз, сколько выбрано
-          for (let i = 0; i < quantity; i++) {
-            ingredients.push(ingredient);
-          }
+          ingredients.push({
+            ...ingredient,
+            quantity,
+            cssClass: quantity === 1 ? "" : quantity === 2 ? "second" : "third",
+          });
         }
       }
     },
@@ -118,6 +131,32 @@ const onPizzaNameChange = (event) => {
 
 const onOrderClick = () => {
   emit("order-click");
+};
+
+const onIngredientDrop = (transferData) => {
+  const { ingredient } = transferData;
+  const currentQuantity = props.selectedIngredients[ingredient.id] || 0;
+
+  if (currentQuantity < 3) {
+    emit("ingredient-change", {
+      ingredient,
+      quantity: currentQuantity + 1,
+    });
+  }
+
+  isDragOver.value = false;
+};
+
+const onDragEnter = () => {
+  isDragOver.value = true;
+};
+
+const onDragLeave = () => {
+  isDragOver.value = false;
+};
+
+const onDragOver = (event) => {
+  event.preventDefault();
 };
 </script>
 
@@ -302,64 +341,109 @@ const onOrderClick = () => {
   background-size: contain;
 }
 
-.pizza__filling--tomatoes {
-  background-image: url("@/assets/img/filling/tomatoes.svg");
+.pizza__filling--second::before {
+  display: block;
+  transform: rotate(45deg);
 }
 
-.pizza__filling--ananas {
-  background-image: url("@/assets/img/filling/ananas.svg");
+.pizza__filling--third::before {
+  display: block;
+  transform: rotate(45deg);
 }
 
-.pizza__filling--bacon {
-  background-image: url("@/assets/img/filling/bacon.svg");
+.pizza__filling--third::after {
+  display: block;
+  transform: rotate(-45deg);
 }
 
-.pizza__filling--blue_cheese {
-  background-image: url("@/assets/img/filling/blue_cheese.svg");
+.pizza__filling--tomatoes,
+.pizza__filling--tomatoes.pizza__filling--second::before,
+.pizza__filling--tomatoes.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/tomatoes.svg");
 }
 
-.pizza__filling--cheddar {
-  background-image: url("@/assets/img/filling/cheddar.svg");
+.pizza__filling--ananas,
+.pizza__filling--ananas.pizza__filling--second::before,
+.pizza__filling--ananas.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/ananas.svg");
 }
 
-.pizza__filling--chile {
-  background-image: url("@/assets/img/filling/chile.svg");
+.pizza__filling--bacon,
+.pizza__filling--bacon.pizza__filling--second::before,
+.pizza__filling--bacon.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/bacon.svg");
 }
 
-.pizza__filling--ham {
-  background-image: url("@/assets/img/filling/ham.svg");
+.pizza__filling--blue_cheese,
+.pizza__filling--blue_cheese.pizza__filling--second::before,
+.pizza__filling--blue_cheese.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/blue_cheese.svg");
 }
 
-.pizza__filling--jalapeno {
-  background-image: url("@/assets/img/filling/jalapeno.svg");
+.pizza__filling--cheddar,
+.pizza__filling--cheddar.pizza__filling--second::before,
+.pizza__filling--cheddar.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/cheddar.svg");
 }
 
-.pizza__filling--mozzarella {
-  background-image: url("@/assets/img/filling/mozzarella.svg");
+.pizza__filling--chile,
+.pizza__filling--chile.pizza__filling--second::before,
+.pizza__filling--chile.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/chile.svg");
 }
 
-.pizza__filling--mushrooms {
-  background-image: url("@/assets/img/filling/mushrooms.svg");
+.pizza__filling--ham,
+.pizza__filling--ham.pizza__filling--second::before,
+.pizza__filling--ham.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/ham.svg");
 }
 
-.pizza__filling--olives {
-  background-image: url("@/assets/img/filling/olives.svg");
+.pizza__filling--jalapeno,
+.pizza__filling--jalapeno.pizza__filling--second::before,
+.pizza__filling--jalapeno.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/jalapeno.svg");
 }
 
-.pizza__filling--onion {
-  background-image: url("@/assets/img/filling/onion.svg");
+.pizza__filling--mozzarella,
+.pizza__filling--mozzarella.pizza__filling--second::before,
+.pizza__filling--mozzarella.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/mozzarella.svg");
 }
 
-.pizza__filling--parmesan {
-  background-image: url("@/assets/img/filling/parmesan.svg");
+.pizza__filling--mushrooms,
+.pizza__filling--mushrooms.pizza__filling--second::before,
+.pizza__filling--mushrooms.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/mushrooms.svg");
 }
 
-.pizza__filling--salami {
-  background-image: url("@/assets/img/filling/salami.svg");
+.pizza__filling--olives,
+.pizza__filling--olives.pizza__filling--second::before,
+.pizza__filling--olives.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/olives.svg");
 }
 
-.pizza__filling--salmon {
-  background-image: url("@/assets/img/filling/salmon.svg");
+.pizza__filling--onion,
+.pizza__filling--onion.pizza__filling--second::before,
+.pizza__filling--onion.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/onion.svg");
+}
+
+.pizza__filling--parmesan,
+.pizza__filling--parmesan.pizza__filling--second::before,
+.pizza__filling--parmesan.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/parmesan.svg");
+}
+
+.pizza__filling--salami,
+.pizza__filling--salami.pizza__filling--second::before,
+.pizza__filling--salami.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/salami.svg");
+}
+
+.pizza__filling--salmon,
+.pizza__filling--salmon.pizza__filling--second::before,
+.pizza__filling--salmon.pizza__filling--third::after {
+  background-image: url("@/assets/img/filling-big/salmon.svg");
 }
 
 .visually-hidden {
@@ -371,5 +455,11 @@ const onOrderClick = () => {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+.pizza--drag-over {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 20px rgba(65, 182, 25, 0.5);
 }
 </style>
