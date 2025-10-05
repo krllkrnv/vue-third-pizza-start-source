@@ -1,20 +1,22 @@
 <template>
   <header class="header">
     <div class="header__logo">
-      <a href="index.html" class="logo">
+      <router-link to="/" class="logo">
         <img
-          src="img/logo.svg"
+          src="@/assets/img/logo.svg"
           alt="V!U!E! Pizza logo"
           width="90"
           height="40"
         />
-      </a>
+      </router-link>
     </div>
     <div class="header__cart">
-      <a href="cart.html">0 ₽</a>
+      <router-link to="/cart">0 ₽</router-link>
     </div>
     <div class="header__user">
-      <a href="#" class="header__login"><span>Войти</span></a>
+      <router-link to="/login" class="header__login"
+        ><span>Войти</span></router-link
+      >
     </div>
   </header>
 </template>
@@ -61,7 +63,7 @@
   transition: 0.3s;
   text-decoration: none;
   color: #ffffff;
-  background: url("../assets/img/cart.svg") no-repeat 15px center;
+  background: url("@/assets/img/cart.svg") no-repeat 15px center;
   background-size: auto 50%;
 }
 .header__cart a:hover:not(:active) {
@@ -79,8 +81,8 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 .header__user a {
   display: block;
@@ -127,7 +129,7 @@
   margin-right: 8px;
   content: "";
   vertical-align: middle;
-  background: url("../assets/img/login.svg") no-repeat center;
+  background: url("@/assets/img/login.svg") no-repeat center;
   background-size: auto 50%;
 }
 
@@ -138,7 +140,7 @@
   margin-left: 8px;
   content: "";
   vertical-align: middle;
-  background: url("../assets/img/login.svg") no-repeat center;
+  background: url("@/assets/img/login.svg") no-repeat center;
   background-size: auto 50%;
 }
 
