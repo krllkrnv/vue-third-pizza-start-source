@@ -1,5 +1,5 @@
 <template>
-  <form class="layout-form" @submit.prevent="onSubmit">
+  <form class="layout-form" @submit.prevent="cartStore.onSubmit">
     <main class="content cart">
       <div class="container">
         <div class="cart__title">
@@ -11,7 +11,7 @@
         </div> -->
 
         <ul class="cart-list sheet">
-          <li v-for="item in cartItems" :key="item.id" class="cart-list__item">
+          <li v-for="item in cartStore.cartItems" :key="item.id" class="cart-list__item">
             <div class="product cart-list__product">
               <img
                 src="@/assets/img/product.svg"
@@ -34,7 +34,7 @@
               <button
                 type="button"
                 class="counter__button counter__button--minus"
-                @click="decreaseQuantity(item.id)"
+                @click="cartStore.decreaseQuantity(item.id)"
               >
                 <span class="visually-hidden">Меньше</span>
               </button>
@@ -48,7 +48,7 @@
               <button
                 type="button"
                 class="counter__button counter__button--plus counter__button--orange"
-                @click="increaseQuantity(item.id)"
+                @click="cartStore.increaseQuantity(item.id)"
               >
                 <span class="visually-hidden">Больше</span>
               </button>
@@ -62,7 +62,7 @@
               <button
                 type="button"
                 class="cart-list__edit"
-                @click="editItem(item.id)"
+                @click="cartStore.editItem(item.id)"
               >
                 Изменить
               </button>
@@ -73,7 +73,7 @@
         <div class="cart__additional">
           <ul class="additional-list">
             <li
-              v-for="additional in additionalItems"
+              v-for="additional in cartStore.additionalItems"
               :key="additional.id"
               class="additional-list__item sheet"
             >
@@ -92,7 +92,7 @@
                   <button
                     type="button"
                     class="counter__button counter__button--minus"
-                    @click="decreaseAdditional(additional.id)"
+                    @click="cartStore.decreaseAdditional(additional.id)"
                   >
                     <span class="visually-hidden">Меньше</span>
                   </button>
@@ -106,7 +106,7 @@
                   <button
                     type="button"
                     class="counter__button counter__button--plus counter__button--orange"
-                    @click="increaseAdditional(additional.id)"
+                    @click="cartStore.increaseAdditional(additional.id)"
                   >
                     <span class="visually-hidden">Больше</span>
                   </button>
@@ -124,7 +124,7 @@
           <div class="cart-form">
             <label class="cart-form__select">
               <span class="cart-form__label">Получение заказа:</span>
-              <select v-model="form.delivery" name="delivery" class="select">
+              <select v-model="delivery" name="delivery" class="select">
                 <option value="pickup">Заберу сам</option>
                 <option value="new-address">Новый адрес</option>
                 <option value="home">Дом</option>
@@ -134,21 +134,21 @@
             <label class="input input--big-label">
               <span>Контактный телефон:</span>
               <input
-                v-model="form.phone"
+                v-model="phone"
                 type="text"
                 name="tel"
                 placeholder="+7 999-999-99-99"
               />
             </label>
 
-            <div v-if="form.delivery !== 'pickup'" class="cart-form__address">
+            <div v-if="delivery !== 'pickup'" class="cart-form__address">
               <span class="cart-form__label">Новый адрес:</span>
 
               <div class="cart-form__input">
                 <label class="input">
                   <span>Улица*</span>
                   <input
-                    v-model="form.address.street"
+                    v-model="street"
                     type="text"
                     name="street"
                     required
@@ -160,7 +160,7 @@
                 <label class="input">
                   <span>Дом*</span>
                   <input
-                    v-model="form.address.house"
+                    v-model="house"
                     type="text"
                     name="house"
                     required
@@ -172,7 +172,7 @@
                 <label class="input">
                   <span>Квартира</span>
                   <input
-                    v-model="form.address.apartment"
+                    v-model="apartment"
                     type="text"
                     name="apartment"
                   />
@@ -194,7 +194,7 @@
         Перейти к конструктору<br />чтоб собрать ещё одну пиццу
       </p>
       <div class="footer__price">
-        <b>Итого: {{ totalPrice }} ₽</b>
+        <b>Итого: {{ cartStore.totalPrice }} ₽</b>
       </div>
 
       <div class="footer__submit">
@@ -205,109 +205,35 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
+import { useCartStore } from "@/stores";
 
-const cartItems = ref([
-  {
-    id: 1,
-    name: "Капричоза",
-    size: "30 см",
-    dough: "тонком тесте",
-    sauce: "томатный",
-    ingredients: "грибы, лук, ветчина, пармезан, ананас",
-    quantity: 1,
-    price: 782,
-  },
-  {
-    id: 2,
-    name: "Любимая пицца",
-    size: "30 см",
-    dough: "тонком тесте",
-    sauce: "томатный",
-    ingredients: "грибы, лук, ветчина, пармезан, ананас, бекон, блю чиз",
-    quantity: 2,
-    price: 782,
-  },
-]);
+const cartStore = useCartStore();
 
-const additionalItems = ref([
-  {
-    id: 1,
-    name: "Coca-Cola 0,5 литра",
-    image: "@/assets/img/cola.svg",
-    quantity: 2,
-    price: 56,
-  },
-  {
-    id: 2,
-    name: "Острый соус",
-    image: "@/assets/img/sauce.svg",
-    quantity: 2,
-    price: 30,
-  },
-  {
-    id: 3,
-    name: "Картошка из печи",
-    image: "@/assets/img/potato.svg",
-    quantity: 2,
-    price: 56,
-  },
-]);
-
-const form = ref({
-  delivery: "pickup",
-  phone: "",
-  address: {
-    street: "",
-    house: "",
-    apartment: "",
-  },
+const delivery = computed({
+  get: () => cartStore.form.delivery,
+  set: (value) => cartStore.updateForm({ delivery: value })
 });
 
-const totalPrice = computed(() => {
-  const pizzaTotal = cartItems.value.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const additionalTotal = additionalItems.value.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  return pizzaTotal + additionalTotal;
+const phone = computed({
+  get: () => cartStore.form.phone,
+  set: (value) => cartStore.updateForm({ phone: value })
 });
 
-const increaseQuantity = (id) => {
-  const item = cartItems.value.find((item) => item.id === id);
-  if (item) item.quantity++;
-};
+const street = computed({
+  get: () => cartStore.form.address.street,
+  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, street: value } })
+});
 
-const decreaseQuantity = (id) => {
-  const item = cartItems.value.find((item) => item.id === id);
-  if (item && item.quantity > 1) item.quantity--;
-};
+const house = computed({
+  get: () => cartStore.form.address.house,
+  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, house: value } })
+});
 
-const increaseAdditional = (id) => {
-  const item = additionalItems.value.find((item) => item.id === id);
-  if (item) item.quantity++;
-};
-
-const decreaseAdditional = (id) => {
-  const item = additionalItems.value.find((item) => item.id === id);
-  if (item && item.quantity > 1) item.quantity--;
-};
-
-const editItem = (id) => {
-  alert(id);
-};
-
-const onSubmit = () => {
-  alert({
-    items: cartItems.value,
-    additional: additionalItems.value,
-    form: form.value,
-    total: totalPrice.value,
-  });
-};
+const apartment = computed({
+  get: () => cartStore.form.address.apartment,
+  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, apartment: value } })
+});
 </script>
 
 <style scoped>
