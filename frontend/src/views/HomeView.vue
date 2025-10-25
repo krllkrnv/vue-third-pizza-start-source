@@ -5,14 +5,14 @@
         <h1 class="title title--big">Конструктор пиццы</h1>
 
         <DoughSelector
-          :dough-options="dough"
-          :selected-dough-id="selectedDough.id"
+          :dough-options="pizzaStore.dough"
+          :selected-dough-id="pizzaStore.selectedDough.id"
           @dough-change="onDoughChange"
         />
 
         <SizeSelector
-          :size-options="sizes"
-          :selected-size-id="selectedSize.id"
+          :size-options="pizzaStore.sizes"
+          :selected-size-id="pizzaStore.selectedSize.id"
           @size-change="onSizeChange"
         />
 
@@ -24,14 +24,14 @@
 
             <div class="sheet__content ingredients">
               <SauceSelector
-                :sauce-options="sauces"
-                :selected-sauce-id="selectedSauce.id"
+                :sauce-options="pizzaStore.sauces"
+                :selected-sauce-id="pizzaStore.selectedSauce.id"
                 @sauce-change="onSauceChange"
               />
 
               <IngredientsSelector
-                :ingredient-options="ingredients"
-                :selected-ingredients="selectedIngredients"
+                :ingredient-options="pizzaStore.ingredients"
+                :selected-ingredients="pizzaStore.selectedIngredients"
                 @ingredient-change="onIngredientChange"
               />
             </div>
@@ -39,12 +39,12 @@
         </div>
 
         <PizzaDisplay
-          :pizza-name="pizzaName"
-          :selected-dough="selectedDough"
-          :selected-size="selectedSize"
-          :selected-sauce="selectedSauce"
-          :selected-ingredients="selectedIngredients"
-          :total-price="totalPrice"
+          :pizza-name="pizzaStore.pizzaName"
+          :selected-dough="pizzaStore.selectedDough"
+          :selected-size="pizzaStore.selectedSize"
+          :selected-sauce="pizzaStore.selectedSauce"
+          :selected-ingredients="pizzaStore.selectedIngredients"
+          :total-price="pizzaStore.totalPrice"
           @pizza-name-change="onPizzaNameChange"
           @order-click="onOrderClick"
           @ingredient-change="onIngredientChange"
@@ -55,11 +55,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import doughData from "@/mocks/dough.json";
-import sizesData from "@/mocks/sizes.json";
-import ingredientsData from "@/mocks/ingredients.json";
-import saucesData from "@/mocks/sauces.json";
+import { usePizzaStore } from "@/stores";
+import { useCartStore } from "@/stores";
 
 import DoughSelector from "@/modules/constructor/DoughSelector.vue";
 import SizeSelector from "@/modules/constructor/SizeSelector.vue";
@@ -67,72 +64,34 @@ import SauceSelector from "@/modules/constructor/SauceSelector.vue";
 import IngredientsSelector from "@/modules/constructor/IngredientsSelector.vue";
 import PizzaDisplay from "@/modules/constructor/PizzaDisplay.vue";
 
-const dough = doughData;
-const sizes = sizesData;
-const ingredients = ingredientsData;
-const sauces = saucesData;
-
-const selectedDough = ref(dough[0]);
-const selectedSize = ref(sizes[1]);
-const selectedSauce = ref(sauces[0]);
-const selectedIngredients = ref({});
-const pizzaName = ref("");
+const pizzaStore = usePizzaStore();
+const cartStore = useCartStore();
 
 const onDoughChange = (doughItem) => {
-  selectedDough.value = doughItem;
+  pizzaStore.setDough(doughItem);
 };
 
 const onSizeChange = (size) => {
-  selectedSize.value = size;
+  pizzaStore.setSize(size);
 };
 
 const onSauceChange = (sauce) => {
-  selectedSauce.value = sauce;
+  pizzaStore.setSauce(sauce);
 };
 
 const onIngredientChange = ({ ingredient, quantity }) => {
-  if (quantity === 0) {
-    delete selectedIngredients.value[ingredient.id];
-  } else {
-    selectedIngredients.value[ingredient.id] = quantity;
-  }
+  pizzaStore.setIngredient({ ingredient, quantity });
 };
 
 const onPizzaNameChange = (name) => {
-  pizzaName.value = name;
+  pizzaStore.setPizzaName(name);
 };
 
 const onOrderClick = () => {
-  console.log("Заказ:", {
-    pizzaName: pizzaName.value,
-    dough: selectedDough.value,
-    size: selectedSize.value,
-    sauce: selectedSauce.value,
-    ingredients: selectedIngredients.value,
-  });
+  const pizza = pizzaStore.createPizza();
+  cartStore.addPizza(pizza);
+  pizzaStore.resetPizza();
 };
-
-const totalPrice = computed(() => {
-  let basePrice = 0;
-
-  basePrice += selectedDough.value?.price || 0;
-
-  basePrice += selectedSauce.value?.price || 0;
-
-  Object.entries(selectedIngredients.value).forEach(
-    ([ingredientId, quantity]) => {
-      const ingredient = ingredients.find(
-        (ing) => ing.id === parseInt(ingredientId),
-      );
-      if (ingredient) {
-        basePrice += ingredient.price * quantity;
-      }
-    },
-  );
-
-  const sizeMultiplier = selectedSize.value?.multiplier || 1;
-  return basePrice * sizeMultiplier;
-});
 </script>
 
 <style scoped>

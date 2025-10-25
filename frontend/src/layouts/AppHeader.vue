@@ -14,17 +14,24 @@
       <router-link to="/cart">{{ cartStore.totalPrice }} ₽</router-link>
     </div>
     <div class="header__user">
-      <router-link to="/login" class="header__login"
+      <router-link
+        v-if="!dataStore.isLoggedIn"
+        to="/login"
+        class="header__login"
         ><span>Войти</span></router-link
       >
+      <router-link v-else to="/profile" class="header__user-info">
+        <span>{{ dataStore.currentUser?.name }}</span>
+      </router-link>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useCartStore } from "@/stores";
+import { useCartStore, useDataStore } from "@/stores";
 
 const cartStore = useCartStore();
+const dataStore = useDataStore();
 </script>
 
 <style scoped>

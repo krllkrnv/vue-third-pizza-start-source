@@ -167,79 +167,33 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
+import { useProfileStore } from "@/stores";
 
-const user = ref({
-  name: "Василий Ложкин",
-  phone: "+7 999-999-99-99",
+const profileStore = useProfileStore();
+
+const user = computed({
+  get: () => profileStore.user,
+  set: (value) => profileStore.updateUser(value)
 });
 
-const addresses = ref([
-  {
-    id: 1,
-    name: "Адрес №1. Тест",
-    street: "Невский пр.",
-    house: "22",
-    apartment: "46",
-    comment: "Позвоните, пожалуйста, от проходной",
-    isEditing: false,
-  },
-  {
-    id: 2,
-    name: "Адрес №2",
-    street: "",
-    house: "",
-    apartment: "",
-    comment: "",
-    isEditing: true,
-  },
-]);
+const addresses = computed(() => profileStore.addresses);
 
 const editAddress = (id) => {
-  const address = addresses.value.find((addr) => addr.id === id);
-  if (address) {
-    address.isEditing = true;
-  }
+  profileStore.editAddress(id);
 };
 
 const saveAddress = (id) => {
-  const address = addresses.value.find((addr) => addr.id === id);
-  if (address) {
-    address.isEditing = false;
-    alert(address);
-  }
+  profileStore.saveAddress(id);
 };
 
 const deleteAddress = (id) => {
-  const index = addresses.value.findIndex((addr) => addr.id === id);
-  if (index > -1) {
-    addresses.value.splice(index, 1);
-  }
+  profileStore.deleteAddress(id);
 };
 
 const addNewAddress = () => {
-  const newId = Math.max(...addresses.value.map((addr) => addr.id)) + 1;
-  addresses.value.push({
-    id: newId,
-    name: `Адрес №${newId}`,
-    street: "",
-    house: "",
-    apartment: "",
-    comment: "",
-    isEditing: true,
-  });
+  profileStore.addAddress();
 };
-
-// Вычисляемое свойство для полного адреса
-addresses.value.forEach((address) => {
-  address.fullAddress = computed(() => {
-    let full = `${address.street}, д. ${address.house}`;
-    if (address.apartment) {
-      full += `, кв. ${address.apartment}`;
-    }
-    return full;
-  });
-});
 </script>
 
 <style scoped>

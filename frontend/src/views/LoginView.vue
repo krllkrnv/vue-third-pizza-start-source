@@ -39,6 +39,11 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useDataStore } from "@/stores";
+
+const router = useRouter();
+const dataStore = useDataStore();
 
 const form = ref({
   email: "",
@@ -46,7 +51,8 @@ const form = ref({
 });
 
 const onSubmit = () => {
-  alert(form.value);
+  dataStore.login(form.value);
+  router.push("/");
 };
 </script>
 

@@ -159,40 +159,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useProfileStore } from "@/stores";
 
-const user = ref({
-  name: "Василий Ложкин",
-  phone: "+7 999-999-99-99",
-  email: "vasily@example.com",
+const profileStore = useProfileStore();
+
+const user = computed({
+  get: () => profileStore.user,
+  set: (value) => profileStore.updateUser(value)
 });
 
-const passwordForm = ref({
-  currentPassword: "",
-  newPassword: "",
-  confirmPassword: "",
+const passwordForm = computed({
+  get: () => profileStore.passwordForm,
+  set: (value) => profileStore.updatePassword(value)
 });
 
 const saveProfile = () => {
-  alert(user.value);
+  profileStore.saveProfile();
 };
 
 const changePassword = () => {
-  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    alert("Пароли не совпадают!");
-    return;
-  }
-
-  alert({
-    currentPassword: passwordForm.value.currentPassword,
-    newPassword: passwordForm.value.newPassword,
-  });
-
-  passwordForm.value = {
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  };
+  profileStore.changePassword();
 };
 </script>
 
