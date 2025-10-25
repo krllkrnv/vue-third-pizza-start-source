@@ -18,10 +18,39 @@ export const useCartStore = defineStore("cart", {
 
   getters: {
     totalPrice: (state) => {
-      return 0;
+      const pizzasTotal = state.pizzas.reduce(
+        (sum, pizza) => sum + pizza.price * pizza.quantity,
+        0,
+      );
+      const miscTotal = state.misc.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      );
+      return pizzasTotal + miscTotal;
     },
     cartItemsCount: (state) => {
       return state.pizzas.reduce((sum, item) => sum + item.quantity, 0);
+    },
+    pizzasTotal: (state) => {
+      return state.pizzas.reduce(
+        (sum, pizza) => sum + pizza.price * pizza.quantity,
+        0,
+      );
+    },
+    miscTotal: (state) => {
+      return state.misc.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      );
+    },
+    isCartEmpty: (state) => {
+      return state.pizzas.length === 0 && state.misc.length === 0;
+    },
+    hasPizzas: (state) => {
+      return state.pizzas.length > 0;
+    },
+    hasMisc: (state) => {
+      return state.misc.length > 0;
     },
   },
 

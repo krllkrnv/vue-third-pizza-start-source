@@ -7,7 +7,7 @@ export const useProfileStore = defineStore("profile", {
       name: "",
       email: "",
       avatar: "",
-      phone: ""
+      phone: "",
     },
     addresses: [],
     passwordForm: {
@@ -18,12 +18,26 @@ export const useProfileStore = defineStore("profile", {
   }),
 
   getters: {
-    fullAddress: (state) => (address) => {
+    fullAddress: () => (address) => {
       let full = `${address.street}, д. ${address.building}`;
       if (address.flat) {
         full += `, кв. ${address.flat}`;
       }
       return full;
+    },
+    hasAddresses: (state) => state.addresses.length > 0,
+    addressesCount: (state) => state.addresses.length,
+    defaultAddress: (state) =>
+      state.addresses.find((address) => address.isDefault) ||
+      state.addresses[0],
+    hasUserData: (state) => {
+      return state.user.name || state.user.email || state.user.phone;
+    },
+    isUserComplete: (state) => {
+      return state.user.name && state.user.email && state.user.phone;
+    },
+    userDisplayName: (state) => {
+      return state.user.name || "Пользователь";
     },
   },
 

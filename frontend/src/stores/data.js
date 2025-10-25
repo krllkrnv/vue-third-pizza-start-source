@@ -21,6 +21,12 @@ export const useDataStore = defineStore("data", {
     isLoggedIn: (state) => state.isAuthenticated,
     hasError: (state) => state.error !== null,
     hasNotifications: (state) => state.notifications.length > 0,
+    ordersCount: (state) => state.orders.length,
+    recentOrders: (state) => state.orders.slice(0, 5),
+    userDisplayName: (state) => {
+      return state.currentUser.name || "Пользователь";
+    },
+    isLoading: (state) => state.loading,
   },
 
   actions: {
