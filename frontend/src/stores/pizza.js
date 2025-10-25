@@ -1,18 +1,14 @@
 import { defineStore } from "pinia";
-import doughData from "@/mocks/dough.json";
-import sizesData from "@/mocks/sizes.json";
-import ingredientsData from "@/mocks/ingredients.json";
-import saucesData from "@/mocks/sauces.json";
 
 export const usePizzaStore = defineStore("pizza", {
   state: () => ({
-    dough: doughData,
-    sizes: sizesData,
-    ingredients: ingredientsData,
-    sauces: saucesData,
-    selectedDough: doughData[0],
-    selectedSize: sizesData[1],
-    selectedSauce: saucesData[0],
+    dough: [],
+    sizes: [],
+    ingredients: [],
+    sauces: [],
+    selectedDough: null,
+    selectedSize: null,
+    selectedSauce: null,
     selectedIngredients: {},
     pizzaName: "",
   }),
@@ -103,9 +99,9 @@ export const usePizzaStore = defineStore("pizza", {
       this.selectedIngredients = {};
     },
     resetPizza() {
-      this.selectedDough = this.dough[0];
-      this.selectedSize = this.sizes[1];
-      this.selectedSauce = this.sauces[0];
+      this.selectedDough = this.dough[0] || null;
+      this.selectedSize = this.sizes[1] || null;
+      this.selectedSauce = this.sauces[0] || null;
       this.selectedIngredients = {};
       this.pizzaName = "";
     },

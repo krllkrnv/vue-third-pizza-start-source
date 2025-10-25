@@ -11,7 +11,7 @@
         </div> -->
 
         <ul class="cart-list sheet">
-          <li v-for="item in cartStore.cartItems" :key="item.id" class="cart-list__item">
+          <li v-for="item in cartStore.pizzas" :key="item.id" class="cart-list__item">
             <div class="product cart-list__product">
               <img
                 src="@/assets/img/product.svg"
@@ -73,7 +73,7 @@
         <div class="cart__additional">
           <ul class="additional-list">
             <li
-              v-for="additional in cartStore.additionalItems"
+              v-for="additional in cartStore.misc"
               :key="additional.id"
               class="additional-list__item sheet"
             >
@@ -226,13 +226,13 @@ const street = computed({
 });
 
 const house = computed({
-  get: () => cartStore.form.address.house,
-  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, house: value } })
+  get: () => cartStore.form.address.building,
+  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, building: value } })
 });
 
 const apartment = computed({
-  get: () => cartStore.form.address.apartment,
-  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, apartment: value } })
+  get: () => cartStore.form.address.flat,
+  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, flat: value } })
 });
 </script>
 

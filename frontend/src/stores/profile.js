@@ -3,30 +3,13 @@ import { defineStore } from "pinia";
 export const useProfileStore = defineStore("profile", {
   state: () => ({
     user: {
-      name: "Василий Ложкин",
-      phone: "+7 999-999-99-99",
-      email: "vasily@example.com",
+      id: null,
+      name: "",
+      email: "",
+      avatar: "",
+      phone: ""
     },
-    addresses: [
-      {
-        id: 1,
-        name: "Адрес №1. Тест",
-        street: "Невский пр.",
-        house: "22",
-        apartment: "46",
-        comment: "Позвоните, пожалуйста, от проходной",
-        isEditing: false,
-      },
-      {
-        id: 2,
-        name: "Адрес №2",
-        street: "",
-        house: "",
-        apartment: "",
-        comment: "",
-        isEditing: true,
-      },
-    ],
+    addresses: [],
     passwordForm: {
       currentPassword: "",
       newPassword: "",
@@ -36,9 +19,9 @@ export const useProfileStore = defineStore("profile", {
 
   getters: {
     fullAddress: (state) => (address) => {
-      let full = `${address.street}, д. ${address.house}`;
-      if (address.apartment) {
-        full += `, кв. ${address.apartment}`;
+      let full = `${address.street}, д. ${address.building}`;
+      if (address.flat) {
+        full += `, кв. ${address.flat}`;
       }
       return full;
     },
@@ -72,14 +55,15 @@ export const useProfileStore = defineStore("profile", {
       };
     },
     addAddress(addressData) {
-      const newId = Math.max(...this.addresses.map((addr) => addr.id)) + 1;
+      const newId = Math.max(...this.addresses.map((addr) => addr.id), 0) + 1;
       this.addresses.push({
         id: newId,
         name: `Адрес №${newId}`,
         street: "",
-        house: "",
-        apartment: "",
+        building: "",
+        flat: "",
         comment: "",
+        userId: "",
         isEditing: true,
         ...addressData,
       });

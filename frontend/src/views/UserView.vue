@@ -108,9 +108,9 @@
               <label class="input">
                 <span>Дом*</span>
                 <input
-                  v-model="address.house"
+                  v-model="address.building"
                   type="text"
-                  name="addr-house"
+                  name="addr-building"
                   placeholder="Введите номер дома"
                   required
                 />
@@ -120,9 +120,9 @@
               <label class="input">
                 <span>Квартира</span>
                 <input
-                  v-model="address.apartment"
+                  v-model="address.flat"
                   type="text"
-                  name="addr-apartment"
+                  name="addr-flat"
                   placeholder="Введите № квартиры"
                 />
               </label>

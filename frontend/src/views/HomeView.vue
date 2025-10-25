@@ -6,13 +6,13 @@
 
         <DoughSelector
           :dough-options="pizzaStore.dough"
-          :selected-dough-id="pizzaStore.selectedDough.id"
+          :selected-dough-id="pizzaStore.selectedDough?.id"
           @dough-change="onDoughChange"
         />
 
         <SizeSelector
           :size-options="pizzaStore.sizes"
-          :selected-size-id="pizzaStore.selectedSize.id"
+          :selected-size-id="pizzaStore.selectedSize?.id"
           @size-change="onSizeChange"
         />
 
@@ -25,7 +25,7 @@
             <div class="sheet__content ingredients">
               <SauceSelector
                 :sauce-options="pizzaStore.sauces"
-                :selected-sauce-id="pizzaStore.selectedSauce.id"
+                :selected-sauce-id="pizzaStore.selectedSauce?.id"
                 @sauce-change="onSauceChange"
               />
 
