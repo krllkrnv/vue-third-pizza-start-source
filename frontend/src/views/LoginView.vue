@@ -1,12 +1,12 @@
 <template>
   <div class="sign-form">
-    <a href="#" class="close close--white">
+    <a href="#" class="close close--white" @click.prevent="goBack">
       <span class="visually-hidden">Закрыть форму авторизации</span>
     </a>
     <div class="sign-form__title">
       <h1 class="title title--small">Авторизуйтесь на сайте</h1>
     </div>
-    <form @submit.prevent="onSubmit">
+    <form @submit.prevent="handleSubmit">
       <div class="sign-form__input">
         <label class="input">
           <span>E-mail</span>
@@ -32,27 +32,41 @@
           />
         </label>
       </div>
-      <button type="submit" class="button">Авторизоваться</button>
+
+      <button type="submit" class="button" :disabled="authStore.loading">
+        Авторизоваться
+      </button>
+
+      <div v-if="authStore.error" class="error-message error-message--global">
+        {{ authStore.error }}
+      </div>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { reactive } from "vue";
 import { useRouter } from "vue-router";
-import { useDataStore } from "@/stores";
+import { useAuthStore } from "@/stores/auth.js";
 
 const router = useRouter();
-const dataStore = useDataStore();
+const authStore = useAuthStore();
 
-const form = ref({
+const form = reactive({
   email: "",
   password: "",
 });
 
-const onSubmit = () => {
-  dataStore.login(form.value);
-  router.push("/");
+const handleSubmit = async () => {
+  try {
+    await authStore.login(form);
+    router.push("/");
+  } catch (error) {
+  }
+};
+
+const goBack = () => {
+  router.back();
 };
 </script>
 

@@ -1,4 +1,7 @@
 import { defineStore } from "pinia";
+import { AddressService } from "@/services";
+import { useAuthStore } from "./auth.js";
+import { getPublicImage } from "@/utils/images.js";
 
 export const useProfileStore = defineStore("profile", {
   state: () => ({
@@ -25,23 +28,74 @@ export const useProfileStore = defineStore("profile", {
       }
       return full;
     },
-    hasAddresses: (state) => state.addresses.length > 0,
     addressesCount: (state) => state.addresses.length,
     defaultAddress: (state) =>
       state.addresses.find((address) => address.isDefault) ||
       state.addresses[0],
-    hasUserData: (state) => {
-      return state.user.name || state.user.email || state.user.phone;
+    userDisplayName: () => {
+      const authStore = useAuthStore();
+      return authStore.user?.name || "Пользователь";
     },
-    isUserComplete: (state) => {
-      return state.user.name && state.user.email && state.user.phone;
-    },
-    userDisplayName: (state) => {
-      return state.user.name || "Пользователь";
+    userAvatar: () => {
+      const authStore = useAuthStore();
+      return authStore.user?.avatar
+        ? getPublicImage(authStore.user.avatar)
+        : null;
     },
   },
 
   actions: {
+    async loadAddresses() {
+      try {
+        const addresses = await AddressService.getAll();
+        this.addresses = addresses;
+      } catch (error) {
+        console.error("[useProfileStore] Error loading addresses:", error);
+      }
+    },
+
+    async addAddress(addressData) {
+      try {
+        const authStore = useAuthStore();
+        const newAddress = await AddressService.create({
+          ...addressData,
+          userId: authStore.user?.id,
+        });
+        this.addresses.push(newAddress);
+        return newAddress;
+      } catch (error) {
+        console.error("[useProfileStore] Error adding address:", error);
+        throw error;
+      }
+    },
+
+    async updateAddress(id, addressData) {
+      try {
+        const updatedAddress = await AddressService.update(id, addressData);
+        const index = this.addresses.findIndex((addr) => addr.id === id);
+        if (index > -1) {
+          this.addresses[index] = updatedAddress;
+        }
+        return updatedAddress;
+      } catch (error) {
+        console.error("[useProfileStore] Error updating address:", error);
+        throw error;
+      }
+    },
+
+    async deleteAddress(id) {
+      try {
+        await AddressService.delete(id);
+        const index = this.addresses.findIndex((addr) => addr.id === id);
+        if (index > -1) {
+          this.addresses.splice(index, 1);
+        }
+      } catch (error) {
+        console.error("[useProfileStore] Error deleting address:", error);
+        throw error;
+      }
+    },
+
     updateUser(userData) {
       this.user = { ...this.user, ...userData };
     },
@@ -53,7 +107,7 @@ export const useProfileStore = defineStore("profile", {
     },
     changePassword() {
       if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
-        alert("Пароли не совпадают!");
+        alert("Passwords do not match!");
         return;
       }
 
@@ -68,26 +122,7 @@ export const useProfileStore = defineStore("profile", {
         confirmPassword: "",
       };
     },
-    addAddress(addressData) {
-      const newId = Math.max(...this.addresses.map((addr) => addr.id), 0) + 1;
-      this.addresses.push({
-        id: newId,
-        name: `Адрес №${newId}`,
-        street: "",
-        building: "",
-        flat: "",
-        comment: "",
-        userId: "",
-        isEditing: true,
-        ...addressData,
-      });
-    },
-    updateAddress(id, addressData) {
-      const address = this.addresses.find((addr) => addr.id === id);
-      if (address) {
-        Object.assign(address, addressData);
-      }
-    },
+
     editAddress(id) {
       const address = this.addresses.find((addr) => addr.id === id);
       if (address) {
@@ -99,12 +134,6 @@ export const useProfileStore = defineStore("profile", {
       if (address) {
         address.isEditing = false;
         alert(address);
-      }
-    },
-    deleteAddress(id) {
-      const index = this.addresses.findIndex((addr) => addr.id === id);
-      if (index > -1) {
-        this.addresses.splice(index, 1);
       }
     },
   },

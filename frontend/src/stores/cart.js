@@ -1,9 +1,13 @@
 import { defineStore } from "pinia";
+import { MiscService, OrderService } from "@/services";
+import { useAuthStore } from "./auth.js";
+import { getPublicImage } from "@/utils/images.js";
 
 export const useCartStore = defineStore("cart", {
   state: () => ({
     pizzas: [],
     misc: [],
+    miscItems: [],
     form: {
       delivery: "pickup",
       phone: "",
@@ -55,6 +59,48 @@ export const useCartStore = defineStore("cart", {
   },
 
   actions: {
+    async loadMiscItems() {
+      try {
+        const miscItems = await MiscService.getAll();
+        this.miscItems = miscItems.map((item) => ({
+          ...item,
+          image: getPublicImage(item.image),
+        }));
+      } catch (error) {
+        console.error("[useCartStore] Error loading misc items:", error);
+      }
+    },
+
+    async submitOrder() {
+      try {
+        const authStore = useAuthStore();
+        const orderData = {
+          userId: authStore.user?.id,
+          phone: this.form.phone,
+          address: this.form.delivery === "delivery" ? this.form.address : null,
+          pizzas: this.pizzas.map((pizza) => ({
+            name: pizza.name,
+            sauceId: pizza.sauceId,
+            doughId: pizza.doughId,
+            sizeId: pizza.sizeId,
+            quantity: pizza.quantity,
+            ingredients: pizza.ingredients || [],
+          })),
+          misc: this.misc.map((item) => ({
+            miscId: item.id,
+            quantity: item.quantity,
+          })),
+        };
+
+        const order = await OrderService.create(orderData);
+        this.clearCart();
+        return order;
+      } catch (error) {
+        console.error("[useCartStore] Error creating order:", error);
+        throw error;
+      }
+    },
+
     increaseQuantity(id) {
       const item = this.pizzas.find((item) => item.id === id);
       if (item) item.quantity++;

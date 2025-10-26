@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getToken, removeToken } from "./token-manager.js";
 
 export default class AxiosProvider {
   constructor(options = {}) {
@@ -17,7 +18,7 @@ export default class AxiosProvider {
   setupInterceptors() {
     this.instance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem("authToken");
+        const token = getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -30,7 +31,7 @@ export default class AxiosProvider {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem("authToken");
+          removeToken();
         }
         return Promise.reject(error);
       },
@@ -38,38 +39,22 @@ export default class AxiosProvider {
   }
 
   async get(path, options = {}) {
-    try {
-      const response = await this.instance.get(path, options);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.instance.get(path, options);
+    return response.data;
   }
 
   async post(path, data, options = {}) {
-    try {
-      const response = await this.instance.post(path, data, options);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.instance.post(path, data, options);
+    return response.data;
   }
 
   async put(path, data, options = {}) {
-    try {
-      const response = await this.instance.put(path, data, options);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.instance.put(path, data, options);
+    return response.data;
   }
 
   async delete(path, options = {}) {
-    try {
-      const response = await this.instance.delete(path, options);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.instance.delete(path, options);
+    return response.data;
   }
 }

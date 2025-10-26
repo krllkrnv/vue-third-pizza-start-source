@@ -1,4 +1,11 @@
 import { defineStore } from "pinia";
+import {
+  DoughService,
+  SizeService,
+  IngredientService,
+  SauceService,
+} from "@/services";
+import { getPublicImage } from "@/utils/images.js";
 
 export const usePizzaStore = defineStore("pizza", {
   state: () => ({
@@ -61,6 +68,38 @@ export const usePizzaStore = defineStore("pizza", {
   },
 
   actions: {
+    async loadData() {
+      try {
+        const [dough, sizes, ingredients, sauces] = await Promise.all([
+          DoughService.getAll(),
+          SizeService.getAll(),
+          IngredientService.getAll(),
+          SauceService.getAll(),
+        ]);
+
+        this.dough = dough.map((item) => ({
+          ...item,
+          image: getPublicImage(item.image),
+        }));
+
+        this.sizes = sizes.map((item) => ({
+          ...item,
+          image: getPublicImage(item.image),
+        }));
+
+        this.ingredients = ingredients.map((item) => ({
+          ...item,
+          image: getPublicImage(item.image),
+        }));
+
+        this.sauces = sauces;
+
+        this.resetPizza();
+      } catch (error) {
+        console.error("[usePizzaStore] Error loading pizza data:", error);
+      }
+    },
+
     setDough(dough) {
       this.selectedDough = dough;
     },
