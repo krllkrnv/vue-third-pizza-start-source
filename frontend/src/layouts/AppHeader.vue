@@ -15,23 +15,23 @@
     </div>
     <div class="header__user">
       <router-link
-        v-if="!dataStore.isLoggedIn"
+        v-if="!authStore.isAuthenticated"
         to="/login"
         class="header__login"
         ><span>Войти</span></router-link
       >
       <router-link v-else to="/profile" class="header__user-info">
-        <span>{{ dataStore.currentUser?.name }}</span>
+        <span>{{ authStore.user?.name }}</span>
       </router-link>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useCartStore, useDataStore } from "@/stores";
+import { useCartStore, useAuthStore } from "@/stores";
 
 const cartStore = useCartStore();
-const dataStore = useDataStore();
+const authStore = useAuthStore();
 </script>
 
 <style scoped>

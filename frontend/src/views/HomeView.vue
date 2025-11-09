@@ -44,6 +44,7 @@
           :selected-size="pizzaStore.selectedSize"
           :selected-sauce="pizzaStore.selectedSauce"
           :selected-ingredients="pizzaStore.selectedIngredients"
+          :ingredients="pizzaStore.ingredients"
           :total-price="pizzaStore.totalPrice"
           @pizza-name-change="onPizzaNameChange"
           @order-click="onOrderClick"
@@ -55,6 +56,7 @@
 </template>
 
 <script setup>
+import { onMounted } from "vue";
 import { usePizzaStore } from "@/stores";
 import { useCartStore } from "@/stores";
 
@@ -66,6 +68,10 @@ import PizzaDisplay from "@/modules/constructor/PizzaDisplay.vue";
 
 const pizzaStore = usePizzaStore();
 const cartStore = useCartStore();
+
+onMounted(() => {
+  pizzaStore.loadData();
+});
 
 const onDoughChange = (doughItem) => {
   pizzaStore.setDough(doughItem);

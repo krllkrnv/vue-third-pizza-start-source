@@ -49,7 +49,6 @@
 <script setup>
 import { computed, ref } from "vue";
 import { AppDrop } from "@/common/components";
-import ingredientsData from "@/mocks/ingredients.json";
 
 const props = defineProps({
   pizzaName: {
@@ -71,6 +70,11 @@ const props = defineProps({
   selectedIngredients: {
     type: Object,
     default: () => ({}),
+  },
+  ingredients: {
+    type: Array,
+    required: true,
+    default: () => [],
   },
   totalPrice: {
     type: Number,
@@ -118,11 +122,14 @@ const canOrder = computed(() => {
 });
 
 const getIngredientClass = (ingredient) => {
-  return ingredient.image.replace("filling/", "").replace(".svg", "");
+  const imagePath = ingredient.image || "";
+  // Извлекаем имя файла из пути типа "/api/public/img/filling/mushrooms.svg" или "filling/mushrooms.svg"
+  const match = imagePath.match(/([^/]+)\.svg$/);
+  return match ? match[1] : imagePath.replace("filling/", "").replace(".svg", "");
 };
 
 const findIngredientById = (id) => {
-  return ingredientsData.find((ing) => ing.id === id);
+  return props.ingredients.find((ing) => ing.id === id);
 };
 
 const onPizzaNameChange = (event) => {

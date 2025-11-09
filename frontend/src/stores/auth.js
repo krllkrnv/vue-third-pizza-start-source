@@ -25,7 +25,7 @@ export const useAuthStore = defineStore("auth", {
           credentials.password,
         );
         setToken(response.token);
-        this.isAuthenticated = true;
+        await this.getMe();
       } catch (error) {
         this.error = error.message || "Login error";
         throw error;

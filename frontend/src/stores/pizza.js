@@ -145,10 +145,17 @@ export const usePizzaStore = defineStore("pizza", {
       this.pizzaName = "";
     },
     createPizza() {
-      const ingredientsList = Object.entries(this.selectedIngredients)
-        .map(([ingredientId]) => {
+      const ingredientsArray = Object.entries(this.selectedIngredients)
+        .map(([ingredientId, quantity]) => ({
+          ingredientId: parseInt(ingredientId),
+          quantity: quantity,
+        }))
+        .filter(item => item.quantity > 0);
+
+      const ingredientsList = ingredientsArray
+        .map(({ ingredientId }) => {
           const ingredient = this.ingredients.find(
-            (ing) => ing.id === parseInt(ingredientId),
+            (ing) => ing.id === ingredientId,
           );
           return ingredient ? ingredient.name : "";
         })
@@ -158,10 +165,14 @@ export const usePizzaStore = defineStore("pizza", {
       return {
         id: Date.now(),
         name: this.pizzaName,
+        sizeId: this.selectedSize.id,
+        doughId: this.selectedDough.id,
+        sauceId: this.selectedSauce.id,
         size: this.selectedSize.name,
         dough: this.selectedDough.name.toLowerCase() + " тесте",
         sauce: this.selectedSauce.name.toLowerCase(),
-        ingredients: ingredientsList,
+        ingredients: ingredientsArray,
+        ingredientsText: ingredientsList,
         price: this.totalPrice,
         quantity: 1,
       };

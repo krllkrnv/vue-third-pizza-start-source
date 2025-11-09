@@ -8,6 +8,7 @@ export const useCartStore = defineStore("cart", {
     pizzas: [],
     misc: [],
     miscItems: [],
+    showPopup: false,
     form: {
       delivery: "pickup",
       phone: "",
@@ -94,11 +95,15 @@ export const useCartStore = defineStore("cart", {
 
         const order = await OrderService.create(orderData);
         this.clearCart();
+        this.showPopup = true;
         return order;
       } catch (error) {
         console.error("[useCartStore] Error creating order:", error);
         throw error;
       }
+    },
+    closePopup() {
+      this.showPopup = false;
     },
 
     increaseQuantity(id) {
@@ -140,12 +145,7 @@ export const useCartStore = defineStore("cart", {
       this.misc = [];
     },
     onSubmit() {
-      alert({
-        items: this.pizzas,
-        additional: this.misc,
-        form: this.form,
-        total: this.totalPrice,
-      });
+      this.submitOrder();
     },
   },
 });
