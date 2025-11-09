@@ -22,11 +22,13 @@
           :class="[pizzaFoundationClass, { 'pizza--drag-over': isDragOver }]"
         >
           <div class="pizza__wrapper">
-            <div
-              v-for="(ingredient, index) in visibleIngredients"
-              :key="`${ingredient.id}-${index}`"
-              :class="`pizza__filling pizza__filling--${getIngredientClass(ingredient)}${ingredient.cssClass ? ` pizza__filling--${ingredient.cssClass}` : ''}`"
-            ></div>
+            <TransitionGroup name="pop" tag="div" class="pizza__fillings">
+              <div
+                v-for="ingredient in visibleIngredients"
+                :key="`${ingredient.id}-${ingredient.quantityIndex}`"
+                :class="`pizza__filling pizza__filling--${getIngredientClass(ingredient)}${ingredient.cssClass ? ` pizza__filling--${ingredient.cssClass}` : ''}`"
+              ></div>
+            </TransitionGroup>
           </div>
         </div>
       </AppDrop>
@@ -105,11 +107,13 @@ const visibleIngredients = computed(() => {
       if (quantity > 0) {
         const ingredient = findIngredientById(parseInt(ingredientId));
         if (ingredient) {
-          ingredients.push({
-            ...ingredient,
-            quantity,
-            cssClass: quantity === 1 ? "" : quantity === 2 ? "second" : "third",
-          });
+          for (let i = 0; i < quantity; i++) {
+            ingredients.push({
+              ...ingredient,
+              quantityIndex: i,
+              cssClass: i === 0 ? "" : i === 1 ? "second" : "third",
+            });
+          }
         }
       }
     },
@@ -468,5 +472,33 @@ const onDragOver = (event) => {
   transform: scale(1.05);
   transition: transform 0.2s ease;
   box-shadow: 0 0 20px rgba(65, 182, 25, 0.5);
+}
+
+.pizza__fillings {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pop-enter-active {
+  animation: pop-in 0.5s;
+}
+
+.pop-leave-active {
+  animation: pop-in 0.5s reverse;
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>

@@ -1,17 +1,22 @@
 <template>
   <form class="layout-form" @submit.prevent="cartStore.onSubmit">
+    <AppPopup :is-visible="cartStore.showPopup" @close="cartStore.closePopup" />
     <main class="content cart">
       <div class="container">
         <div class="cart__title">
           <h1 class="title title--big">Корзина</h1>
         </div>
 
-        <!-- <div class="sheet cart__empty">
-          <p>В корзине нет ни одного товара</p>
-        </div> -->
+        <div v-if="isCartEmpty" class="sheet cart__empty">
+          <p>Корзина пуста</p>
+        </div>
 
-        <ul class="cart-list sheet">
-          <li v-for="item in cartStore.pizzas" :key="item.id" class="cart-list__item">
+        <ul v-else class="cart-list sheet">
+          <li
+            v-for="item in cartStore.pizzas"
+            :key="item.id"
+            class="cart-list__item"
+          >
             <div class="product cart-list__product">
               <img
                 src="@/assets/img/product.svg"
@@ -25,7 +30,7 @@
                 <ul>
                   <li>{{ item.size }}, на {{ item.dough }}</li>
                   <li>Соус: {{ item.sauce }}</li>
-                  <li>Начинка: {{ item.ingredients }}</li>
+                  <li>Начинка: {{ item.ingredientsText }}</li>
                 </ul>
               </div>
             </div>
@@ -120,7 +125,7 @@
           </ul>
         </div>
 
-        <div class="cart__form">
+        <div v-if="!isCartEmpty" class="cart__form">
           <div class="cart-form">
             <label class="cart-form__select">
               <span class="cart-form__label">Получение заказа:</span>
@@ -147,35 +152,21 @@
               <div class="cart-form__input">
                 <label class="input">
                   <span>Улица*</span>
-                  <input
-                    v-model="street"
-                    type="text"
-                    name="street"
-                    required
-                  />
+                  <input v-model="street" type="text" name="street" required />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Дом*</span>
-                  <input
-                    v-model="house"
-                    type="text"
-                    name="house"
-                    required
-                  />
+                  <input v-model="house" type="text" name="house" required />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Квартира</span>
-                  <input
-                    v-model="apartment"
-                    type="text"
-                    name="apartment"
-                  />
+                  <input v-model="apartment" type="text" name="apartment" />
                 </label>
               </div>
             </div>
@@ -198,7 +189,9 @@
       </div>
 
       <div class="footer__submit">
-        <button type="submit" class="button">Оформить заказ</button>
+        <button type="submit" class="button" :disabled="isCartEmpty">
+          Оформить заказ
+        </button>
       </div>
     </section>
   </form>
@@ -207,32 +200,46 @@
 <script setup>
 import { computed } from "vue";
 import { useCartStore } from "@/stores";
+import { AppPopup } from "@/common/components";
 
 const cartStore = useCartStore();
 
+const isCartEmpty = computed(() => {
+  return cartStore.pizzas.length === 0 && cartStore.misc.length === 0;
+});
+
 const delivery = computed({
   get: () => cartStore.form.delivery,
-  set: (value) => cartStore.updateForm({ delivery: value })
+  set: (value) => cartStore.updateForm({ delivery: value }),
 });
 
 const phone = computed({
   get: () => cartStore.form.phone,
-  set: (value) => cartStore.updateForm({ phone: value })
+  set: (value) => cartStore.updateForm({ phone: value }),
 });
 
 const street = computed({
   get: () => cartStore.form.address.street,
-  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, street: value } })
+  set: (value) =>
+    cartStore.updateForm({
+      address: { ...cartStore.form.address, street: value },
+    }),
 });
 
 const house = computed({
   get: () => cartStore.form.address.building,
-  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, building: value } })
+  set: (value) =>
+    cartStore.updateForm({
+      address: { ...cartStore.form.address, building: value },
+    }),
 });
 
 const apartment = computed({
   get: () => cartStore.form.address.flat,
-  set: (value) => cartStore.updateForm({ address: { ...cartStore.form.address, flat: value } })
+  set: (value) =>
+    cartStore.updateForm({
+      address: { ...cartStore.form.address, flat: value },
+    }),
 });
 </script>
 
